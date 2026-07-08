@@ -19,6 +19,19 @@ The default package is small and requires the .NET 9 Desktop Runtime. If the run
 .\install.ps1 -Owner <owner> -Repo WxBridge -SingleFile -AddToPath -InstallSkill
 ```
 
+By default the CLI is installed to `%LOCALAPPDATA%\WxBridge`. The installer also:
+
+- creates `%LOCALAPPDATA%\WxBridge\wxbridge.cmd`;
+- sets the user environment variable `WXBRIDGE_HOME` to the install directory;
+- optionally adds the install directory to the user `PATH` when `-AddToPath` is used;
+- when `-InstallSkill` is used, writes the installed CLI path into the skill file `references/local-install.json`.
+
+After installation, verify the CLI with:
+
+```powershell
+& "$env:WXBRIDGE_HOME\wxbridge.cmd" status
+```
+
 To install or refresh only the Codex skill from a cloned copy of this repository:
 
 ```powershell

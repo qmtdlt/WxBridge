@@ -9,11 +9,17 @@ description: Use the local WxBridge CLI to operate WeChat from Codex or another 
 
 Use WxBridge as the deterministic control layer for WeChat. Codex handles natural language, visual positioning, and safety checks; the WxBridge CLI handles window switching, right-click copying, clipboard operations, Markdown writing, image saving, scrolling, and de-duplication.
 
-Run commands from the WxBridge repo:
+Resolve the CLI command in this order:
+
+1. If `references/local-install.json` exists in this installed skill, use its `command` value.
+2. Else if `$env:WXBRIDGE_HOME` is set, use `$env:WXBRIDGE_HOME\wxbridge.cmd`.
+3. Else if `wxbridge` is on `PATH`, use `wxbridge`.
+4. Else try `%LOCALAPPDATA%\WxBridge\wxbridge.cmd`.
+
+Installed commands usually look like:
 
 ```powershell
-cd <repo-dir>
-.\wxbridge.ps1 ...
+& "$env:WXBRIDGE_HOME\wxbridge.cmd" ...
 ```
 
 Read [references/commands.md](references/commands.md) when you need exact command syntax or an export workflow.

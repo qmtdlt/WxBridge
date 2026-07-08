@@ -45,7 +45,36 @@ function Add-UserPath($PathToAdd) {
     }
 }
 
-function Install-WxBridgeSkill($Owner, $Repo, $Tag, $TempRoot, $CodexHome) {
+function Write-WxBridgeInstallMetadata($SkillDir, $InstallDir) {
+    if ([string]::IsNullOrWhiteSpace($SkillDir) -or -not (Test-Path $SkillDir)) {
+        return
+    }
+
+    $resolvedInstallDir = [System.IO.Path]::GetFullPath($InstallDir)
+    $referencesDir = Join-Path $SkillDir "references"
+    New-Item -ItemType Directory -Path $referencesDir -Force | Out-Null
+
+    $metadata = [ordered]@{
+        installDir = $resolvedInstallDir
+        command = (Join-Path $resolvedInstallDir "wxbridge.cmd")
+        script = (Join-Path $resolvedInstallDir "wxbridge.ps1")
+        exe = (Join-Path $resolvedInstallDir "WxBridge.Cli.exe")
+        installedAt = [DateTimeOffset]::Now.ToString("o")
+    }
+
+    $metadataPath = Join-Path $referencesDir "local-install.json"
+    $metadata | ConvertTo-Json | Set-Content -LiteralPath $metadataPath -Encoding UTF8
+    Write-Host "Wrote wxbridge install metadata to $metadataPath"
+}
+
+function Set-WxBridgeHome($InstallDir) {
+    $resolvedInstallDir = [System.IO.Path]::GetFullPath($InstallDir)
+    [Environment]::SetEnvironmentVariable("WXBRIDGE_HOME", $resolvedInstallDir, "User")
+    $env:WXBRIDGE_HOME = $resolvedInstallDir
+    Write-Host "Set user WXBRIDGE_HOME: $resolvedInstallDir"
+}
+
+function Install-WxBridgeSkill($Owner, $Repo, $Tag, $TempRoot, $CodexHome, $InstallDir) {
     if ([string]::IsNullOrWhiteSpace($CodexHome)) {
         $CodexHome = Join-Path $HOME ".codex"
     }
@@ -75,6 +104,7 @@ function Install-WxBridgeSkill($Owner, $Repo, $Tag, $TempRoot, $CodexHome) {
     }
 
     Copy-Item -LiteralPath $skillDir -Destination $targetSkill -Recurse
+    Write-WxBridgeInstallMetadata $targetSkill $InstallDir
     Write-Host "Installed wxbridge Codex skill to $targetSkill"
 }
 
@@ -125,12 +155,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0wxbridge.ps1" %*
 "@
     Set-Content -LiteralPath $cmdPath -Value $cmd -Encoding ASCII
 
+    Set-WxBridgeHome $InstallDir
+
     if ($AddToPath) {
         Add-UserPath $InstallDir
     }
 
     if ($InstallSkill) {
-        Install-WxBridgeSkill $Owner $Repo $tag $tempRoot $CodexHome
+        Install-WxBridgeSkill $Owner $Repo $tag $tempRoot $CodexHome $InstallDir
     }
 
     Write-Host "Installed WxBridge to $InstallDir"

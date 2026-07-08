@@ -2,11 +2,18 @@
 
 ## Basics
 
-Run commands from:
+Resolve the command before running workflows:
+
+- Prefer `references/local-install.json` from the installed skill. Use its `command` field.
+- If that file is missing, use `$env:WXBRIDGE_HOME\wxbridge.cmd`.
+- If `WXBRIDGE_HOME` is missing, try `wxbridge` from `PATH`.
+- If PATH is not refreshed yet, try `$env:LOCALAPPDATA\WxBridge\wxbridge.cmd`.
+
+Example:
 
 ```powershell
-cd <repo-dir>
-.\wxbridge.ps1 status
+$wxbridge = "$env:WXBRIDGE_HOME\wxbridge.cmd"
+& $wxbridge status
 ```
 
 ## Install From GitHub
@@ -18,21 +25,23 @@ iwr https://raw.githubusercontent.com/<owner>/WxBridge/main/packaging/install.ps
 .\install.ps1 -Owner <owner> -Repo WxBridge -AddToPath -InstallSkill
 ```
 
+The default install location is `%LOCALAPPDATA%\WxBridge`. The installer also sets the user environment variable `WXBRIDGE_HOME` and writes `references/local-install.json` into the installed skill so Codex can find the CLI even when PATH has not refreshed.
+
 Use `-SingleFile` when the machine should not install the .NET 9 Desktop Runtime separately:
 
 ```powershell
 .\install.ps1 -Owner <owner> -Repo WxBridge -SingleFile -AddToPath -InstallSkill
 ```
 
-Use `.\wxbridge.ps1 -Rebuild status` only after code changes.
+Use `.\wxbridge.ps1 -Rebuild status` only when working inside a cloned development repository after code changes.
 
 ## Open Chat
 
 Use pinyin for search names:
 
 ```powershell
-.\wxbridge.ps1 sessions open --name "filetransferassistant"
-.\wxbridge.ps1 sessions open --name "laopo"
+& $wxbridge sessions open --name "filetransferassistant"
+& $wxbridge sessions open --name "contacta"
 ```
 
 The CLI searches WeChat and opens the first result. For Chinese user requests, convert the target name to pinyin before calling the command.
@@ -42,19 +51,19 @@ The CLI searches WeChat and opens the first result. For Chinese user requests, c
 Set default output directory:
 
 ```powershell
-.\wxbridge.ps1 config set-output-dir --path "<captures-dir>"
+& $wxbridge config set-output-dir --path "<captures-dir>"
 ```
 
 Set default Markdown file name:
 
 ```powershell
-.\wxbridge.ps1 config set-output-name --name "ABC"
+& $wxbridge config set-output-name --name "ABC"
 ```
 
 Set the user's own speaker name:
 
 ```powershell
-.\wxbridge.ps1 config set-self-speaker --name "self-name"
+& $wxbridge config set-self-speaker --name "self-name"
 ```
 
 ## Visible Chat Export
@@ -62,7 +71,7 @@ Set the user's own speaker name:
 1. Snapshot current visible chat:
 
 ```powershell
-.\wxbridge.ps1 messages snapshot-visible --name "visible-test"
+& $wxbridge messages snapshot-visible --name "visible-test"
 ```
 
 2. Inspect `data.screenshot`. Write `data.suggestedAnalysis` as lightweight JSON:
@@ -80,7 +89,7 @@ Set the user's own speaker name:
 3. Apply:
 
 ```powershell
-.\wxbridge.ps1 messages apply-visible-analysis --input "<captures-dir>\visible-test_assets\visible-chat-analysis.json"
+& $wxbridge messages apply-visible-analysis --input "<captures-dir>\visible-test_assets\visible-chat-analysis.json"
 ```
 
 Check `writtenTexts`, `copiedTexts`, `failedTexts`, `copiedImages`, and `failedImages`. Retry failed items with better points.
@@ -90,13 +99,13 @@ Check `writtenTexts`, `copiedTexts`, `failedTexts`, `copiedImages`, and `failedI
 1. Snapshot the main chat area:
 
 ```powershell
-.\wxbridge.ps1 merged snapshot-entry --name "merged-test"
+& $wxbridge merged snapshot-entry --name "merged-test"
 ```
 
 2. Inspect the screenshot and identify the merged-record card bbox. Open and snapshot the popup:
 
 ```powershell
-.\wxbridge.ps1 merged open-entry-and-snapshot --snapshot "<captures-dir>\merged-test_assets\merged-entry-snapshot.json" --x 78 --y 310 --w 248 --h 132 --name "merged-test" --index 001
+& $wxbridge merged open-entry-and-snapshot --snapshot "<captures-dir>\merged-test_assets\merged-entry-snapshot.json" --x 78 --y 310 --w 248 --h 132 --name "merged-test" --index 001
 ```
 
 3. Inspect each popup screenshot and write lightweight popup analysis:
@@ -114,13 +123,13 @@ Check `writtenTexts`, `copiedTexts`, `failedTexts`, `copiedImages`, and `failedI
 4. Apply, scroll, and snapshot next screen:
 
 ```powershell
-.\wxbridge.ps1 merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-001.json" --name "merged-test" --index 002
+& $wxbridge merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-001.json" --name "merged-test" --index 002
 ```
 
 5. Repeat for each new popup screenshot. On the final screen:
 
 ```powershell
-.\wxbridge.ps1 merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-004.json" --name "merged-test" --no-scroll
+& $wxbridge merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-004.json" --name "merged-test" --no-scroll
 ```
 
 The merged exporter keeps `merged-export-state.json` and skips duplicate copied text and duplicate images by SHA256.
