@@ -1,0 +1,121 @@
+# WxBridge Command Reference
+
+## Basics
+
+Run commands from:
+
+```powershell
+cd <repo-dir>
+.\wxbridge.ps1 status
+```
+
+Use `.\wxbridge.ps1 -Rebuild status` only after code changes.
+
+## Open Chat
+
+Use pinyin for search names:
+
+```powershell
+.\wxbridge.ps1 sessions open --name "filetransferassistant"
+.\wxbridge.ps1 sessions open --name "laopo"
+```
+
+The CLI searches WeChat and opens the first result. For Chinese user requests, convert the target name to pinyin before calling the command.
+
+## Markdown Configuration
+
+Set default output directory:
+
+```powershell
+.\wxbridge.ps1 config set-output-dir --path "<captures-dir>"
+```
+
+Set default Markdown file name:
+
+```powershell
+.\wxbridge.ps1 config set-output-name --name "ABC"
+```
+
+Set the user's own speaker name:
+
+```powershell
+.\wxbridge.ps1 config set-self-speaker --name "self-name"
+```
+
+## Visible Chat Export
+
+1. Snapshot current visible chat:
+
+```powershell
+.\wxbridge.ps1 messages snapshot-visible --name "visible-test"
+```
+
+2. Inspect `data.screenshot`. Write `data.suggestedAnalysis` as lightweight JSON:
+
+```json
+{
+  "snapshot": "<captures-dir>\\visible-test_assets\\visible-chat-snapshot.json",
+  "copyPoints": [
+    { "speaker": "sender-a", "role": "other", "type": "text", "x": 180, "y": 245 },
+    { "speaker": "self-name", "role": "self", "type": "image", "x": 620, "y": 390 }
+  ]
+}
+```
+
+3. Apply:
+
+```powershell
+.\wxbridge.ps1 messages apply-visible-analysis --input "<captures-dir>\visible-test_assets\visible-chat-analysis.json"
+```
+
+Check `writtenTexts`, `copiedTexts`, `failedTexts`, `copiedImages`, and `failedImages`. Retry failed items with better points.
+
+## Merged Chat Record Export
+
+1. Snapshot the main chat area:
+
+```powershell
+.\wxbridge.ps1 merged snapshot-entry --name "merged-test"
+```
+
+2. Inspect the screenshot and identify the merged-record card bbox. Open and snapshot the popup:
+
+```powershell
+.\wxbridge.ps1 merged open-entry-and-snapshot --snapshot "<captures-dir>\merged-test_assets\merged-entry-snapshot.json" --x 78 --y 310 --w 248 --h 132 --name "merged-test" --index 001
+```
+
+3. Inspect each popup screenshot and write lightweight popup analysis:
+
+```json
+{
+  "snapshot": "<captures-dir>\\merged-test_assets\\merged-popup-snapshot-001.json",
+  "copyPoints": [
+    { "speaker": "sender-a", "type": "image", "x": 204, "y": 187 },
+    { "speaker": "sender-a", "type": "text", "x": 241, "y": 361 }
+  ]
+}
+```
+
+4. Apply, scroll, and snapshot next screen:
+
+```powershell
+.\wxbridge.ps1 merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-001.json" --name "merged-test" --index 002
+```
+
+5. Repeat for each new popup screenshot. On the final screen:
+
+```powershell
+.\wxbridge.ps1 merged apply-scroll-snapshot --input "<captures-dir>\merged-test_assets\merged-popup-analysis-004.json" --name "merged-test" --no-scroll
+```
+
+The merged exporter keeps `merged-export-state.json` and skips duplicate copied text and duplicate images by SHA256.
+
+## Final Response Format
+
+When an export succeeds, return the full Markdown path in a copyable block:
+
+```powershell
+<captures-dir>\merged-test.md
+```
+
+

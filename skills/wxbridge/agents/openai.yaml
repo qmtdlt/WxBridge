@@ -1,0 +1,4 @@
+interface:
+  display_name: "WxBridge"
+  short_description: "Operate WeChat through the WxBridge CLI."
+  default_prompt: "Use wxbridge to operate WeChat safely through the local WxBridge CLI."

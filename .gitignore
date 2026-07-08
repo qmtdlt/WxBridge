@@ -1,0 +1,25 @@
+bin/
+obj/
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Build and publish outputs
+.buildcheck/
+.publish-size-check/
+dist/
+artifacts/
+TestResults/
+
+# Local configuration and capture outputs
+wxbridge.json
+*_assets/
+chat-assets/
+微信聊天记录-*.md
+manual-capture*.md
+*.log
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
