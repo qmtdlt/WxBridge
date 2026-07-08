@@ -35,6 +35,17 @@ Use `-SingleFile` when the machine should not install the .NET 9 Desktop Runtime
 
 Use `.\wxbridge.ps1 -Rebuild status` only when working inside a cloned development repository after code changes.
 
+## Uninstall For Clean Testing
+
+Remove the installed CLI and installed Codex skill before repeat install tests:
+
+```powershell
+iwr https://raw.githubusercontent.com/<owner>/WxBridge/main/packaging/uninstall.ps1 -OutFile uninstall.ps1
+.\uninstall.ps1 -RemoveFromPath
+```
+
+The uninstall script removes the default CLI install directory, the installed `wxbridge` skill, and `WXBRIDGE_HOME` when it points to that install directory. `-RemoveFromPath` also removes the install directory from the user PATH. Exported Markdown files are not removed.
+
 ## Open Chat
 
 Use Hanyu Pinyin for search names. Do not translate Chinese names by meaning.

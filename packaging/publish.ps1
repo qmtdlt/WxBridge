@@ -28,6 +28,7 @@ Copy-Item -LiteralPath (Join-Path $repoRoot "wxbridge.ps1") -Destination (Join-P
 
 Copy-Item -LiteralPath (Join-Path $repoRoot "packaging\install.ps1") -Destination (Join-Path $dist "install.ps1")
 Copy-Item -LiteralPath (Join-Path $repoRoot "packaging\install-skill.ps1") -Destination (Join-Path $dist "install-skill.ps1")
+Copy-Item -LiteralPath (Join-Path $repoRoot "packaging\uninstall.ps1") -Destination (Join-Path $dist "uninstall.ps1")
 
 $frameworkZip = Join-Path $dist "WxBridge-win-x64.zip"
 $singleFileZip = Join-Path $dist "WxBridge-win-x64-single-file.zip"

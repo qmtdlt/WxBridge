@@ -38,6 +38,24 @@ To install or refresh only the Codex skill from a cloned copy of this repository
 .\packaging\install-skill.ps1
 ```
 
+## Uninstall
+
+For repeatable install tests, remove the local CLI and Codex skill first:
+
+```powershell
+iwr https://raw.githubusercontent.com/<owner>/WxBridge/main/packaging/uninstall.ps1 -OutFile uninstall.ps1
+.\uninstall.ps1 -RemoveFromPath
+```
+
+The uninstall script removes:
+
+- the CLI install directory, default `%LOCALAPPDATA%\WxBridge`;
+- the installed Codex skill at `%USERPROFILE%\.codex\skills\wxbridge`;
+- `WXBRIDGE_HOME` when it points to the removed install directory;
+- the install directory from the user `PATH` when `-RemoveFromPath` is used.
+
+It does not remove exported Markdown files or capture folders.
+
 After installation, start a new Codex thread and ask it to use `wxbridge`, for example:
 
 ```text
@@ -58,6 +76,8 @@ This creates:
 dist/WxBridge-win-x64.zip
 dist/WxBridge-win-x64-single-file.zip
 dist/install.ps1
+dist/install-skill.ps1
+dist/uninstall.ps1
 dist/checksums.txt
 ```
 
