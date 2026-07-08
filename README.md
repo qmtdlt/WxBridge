@@ -10,16 +10,16 @@ Recommended install for most users:
 
 ```powershell
 iwr https://raw.githubusercontent.com/<owner>/WxBridge/main/packaging/install.ps1 -OutFile install.ps1
-.\install.ps1 -Owner <owner> -Repo WxBridge -AddToPath
+.\install.ps1 -Owner <owner> -Repo WxBridge -AddToPath -InstallSkill
 ```
 
 The default package is small and requires the .NET 9 Desktop Runtime. If the runtime is not installed, the installer will show the download link. To install the bundled single-file build instead:
 
 ```powershell
-.\install.ps1 -Owner <owner> -Repo WxBridge -SingleFile -AddToPath
+.\install.ps1 -Owner <owner> -Repo WxBridge -SingleFile -AddToPath -InstallSkill
 ```
 
-Install the Codex skill from a cloned copy of this repository:
+To install or refresh only the Codex skill from a cloned copy of this repository:
 
 ```powershell
 .\packaging\install-skill.ps1

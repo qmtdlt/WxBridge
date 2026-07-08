@@ -4,7 +4,9 @@ param(
     [string]$Version = "latest",
     [switch]$SingleFile,
     [string]$InstallDir = "$env:LOCALAPPDATA\WxBridge",
-    [switch]$AddToPath
+    [switch]$AddToPath,
+    [switch]$InstallSkill,
+    [string]$CodexHome = $env:CODEX_HOME
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,6 +43,39 @@ function Add-UserPath($PathToAdd) {
         [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
         Write-Host "Added to user PATH: $PathToAdd"
     }
+}
+
+function Install-WxBridgeSkill($Owner, $Repo, $Tag, $TempRoot, $CodexHome) {
+    if ([string]::IsNullOrWhiteSpace($CodexHome)) {
+        $CodexHome = Join-Path $HOME ".codex"
+    }
+
+    $skillZip = Join-Path $TempRoot "source.zip"
+    $sourceDir = Join-Path $TempRoot "source"
+    $targetRoot = Join-Path $CodexHome "skills"
+    $targetSkill = Join-Path $targetRoot "wxbridge"
+    $sourceUrl = "https://github.com/$Owner/$Repo/archive/refs/tags/$Tag.zip"
+
+    Write-Host "Downloading skill source $sourceUrl"
+    Invoke-WebRequest -Uri $sourceUrl -OutFile $skillZip
+    Expand-Archive -LiteralPath $skillZip -DestinationPath $sourceDir -Force
+
+    $skillDir = Get-ChildItem -LiteralPath $sourceDir -Directory |
+        ForEach-Object { Join-Path $_.FullName "skills\wxbridge" } |
+        Where-Object { Test-Path (Join-Path $_ "SKILL.md") } |
+        Select-Object -First 1
+
+    if ([string]::IsNullOrWhiteSpace($skillDir)) {
+        Fail "Could not find skills\\wxbridge in source archive."
+    }
+
+    New-Item -ItemType Directory -Path $targetRoot -Force | Out-Null
+    if (Test-Path $targetSkill) {
+        Remove-Item -LiteralPath $targetSkill -Recurse -Force
+    }
+
+    Copy-Item -LiteralPath $skillDir -Destination $targetSkill -Recurse
+    Write-Host "Installed wxbridge Codex skill to $targetSkill"
 }
 
 $isWindowsOs = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
@@ -92,6 +127,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0wxbridge.ps1" %*
 
     if ($AddToPath) {
         Add-UserPath $InstallDir
+    }
+
+    if ($InstallSkill) {
+        Install-WxBridgeSkill $Owner $Repo $tag $tempRoot $CodexHome
     }
 
     Write-Host "Installed WxBridge to $InstallDir"

@@ -9,6 +9,21 @@ cd <repo-dir>
 .\wxbridge.ps1 status
 ```
 
+## Install From GitHub
+
+Install both the CLI and this Codex skill:
+
+```powershell
+iwr https://raw.githubusercontent.com/<owner>/WxBridge/main/packaging/install.ps1 -OutFile install.ps1
+.\install.ps1 -Owner <owner> -Repo WxBridge -AddToPath -InstallSkill
+```
+
+Use `-SingleFile` when the machine should not install the .NET 9 Desktop Runtime separately:
+
+```powershell
+.\install.ps1 -Owner <owner> -Repo WxBridge -SingleFile -AddToPath -InstallSkill
+```
+
 Use `.\wxbridge.ps1 -Rebuild status` only after code changes.
 
 ## Open Chat
