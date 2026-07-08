@@ -891,46 +891,27 @@ public sealed class MergedChatRecordService : IMergedChatRecordService
 
         foreach (var anchor in anchors.Distinct())
         {
-            var copyClicks = new[]
+            WindowsClipboard.Clear();
+            Thread.Sleep(_options.InteractionDelayMs);
+
+            if (!ContextMenuCopyClicker.RightClickAndClickCopy(anchor, _options.InteractionDelayMs))
             {
-                new Point(anchor.X + _options.ContextMenuCopyClickOffsetX, anchor.Y + _options.ContextMenuCopyClickOffsetY),
-                new Point(anchor.X + _options.ContextMenuCopyClickOffsetX, anchor.Y - 46),
-                new Point(anchor.X - 90, anchor.Y + _options.ContextMenuCopyClickOffsetY),
-                new Point(anchor.X - 90, anchor.Y - 46),
-                new Point(anchor.X, imageRect.Bottom + 34)
-            };
-
-            foreach (var copyClick in copyClicks.Distinct())
-            {
-                if (IsInsideInflated(imageRect, copyClick, 6))
-                {
-                    continue;
-                }
-
-                WindowsClipboard.Clear();
-                Thread.Sleep(_options.InteractionDelayMs);
-
-                _ = ContextMenuCopyClicker.RightClickAndClickCopy(
-                    anchor,
-                    [copyClick],
-                    _options.InteractionDelayMs,
-                    imageRect);
-                Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
-
-                var copied = WindowsClipboard.Capture();
-
-                if (copied.Image is null)
-                {
-                    copied.Dispose();
-                    DismissContextMenuSafely(screenRegion, imageRect);
-                    Thread.Sleep(_options.InteractionDelayMs);
-                    continue;
-                }
-
-                copiedImage = copied.Image;
-                error = string.Empty;
-                return true;
+                continue;
             }
+
+            Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
+
+            var copied = WindowsClipboard.Capture();
+
+            if (copied.Image is null)
+            {
+                copied.Dispose();
+                continue;
+            }
+
+            copiedImage = copied.Image;
+            error = string.Empty;
+            return true;
         }
 
         error = "clipboard_has_no_image_after_copy";
@@ -972,70 +953,27 @@ public sealed class MergedChatRecordService : IMergedChatRecordService
         var center = new Point(textRect.X + (textRect.Width / 2), textRect.Y + (textRect.Height / 2));
         EnsureForeground(targetWindow);
 
-        var copyClicks = new[]
+        WindowsClipboard.Clear();
+        Thread.Sleep(_options.InteractionDelayMs);
+
+        if (!ContextMenuCopyClicker.RightClickAndClickCopy(center, _options.InteractionDelayMs))
         {
-            new Point(center.X + _options.ContextMenuCopyClickOffsetX, center.Y + _options.ContextMenuCopyClickOffsetY),
-            new Point(center.X + _options.ContextMenuCopyClickOffsetX, center.Y - 46),
-            new Point(center.X - 90, center.Y + _options.ContextMenuCopyClickOffsetY),
-            new Point(center.X - 90, center.Y - 46),
-            new Point(center.X, textRect.Bottom + 34)
-        };
-
-        foreach (var copyClick in copyClicks.Distinct())
-        {
-            if (IsInsideInflated(textRect, copyClick, 6))
-            {
-                continue;
-            }
-
-            WindowsClipboard.Clear();
-            Thread.Sleep(_options.InteractionDelayMs);
-
-            _ = ContextMenuCopyClicker.RightClickAndClickCopy(
-                center,
-                [copyClick],
-                _options.InteractionDelayMs,
-                textRect);
-            Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
-
-            using var copied = WindowsClipboard.Capture();
-            var text = NormalizeCopiedText(copied.Text);
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                DismissContextMenuSafely(screenRegion, textRect);
-                Thread.Sleep(_options.InteractionDelayMs);
-                continue;
-            }
-
-            error = string.Empty;
-            return text;
+            error = "context_menu_not_found";
+            return null;
         }
 
-        error = "clipboard_has_no_text_after_copy";
-        return null;
-    }
+        Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
 
-    private static void DismissContextMenuSafely(Rectangle popupRegion, Rectangle avoidRect)
-    {
-        var point = GetPopupScrollPoint(popupRegion);
-        if (IsInsideInflated(avoidRect, point, 8))
+        using var copied = WindowsClipboard.Capture();
+        var text = NormalizeCopiedText(copied.Text);
+        if (string.IsNullOrWhiteSpace(text))
         {
-            point = new Point(popupRegion.Right - 32, popupRegion.Top + 64);
+            error = "clipboard_has_no_text_after_copy";
+            return null;
         }
 
-        if (IsInsideInflated(avoidRect, point, 8))
-        {
-            point = new Point(popupRegion.Left + 32, popupRegion.Bottom - 32);
-        }
-
-        MouseInputDriver.Click(point.X, point.Y);
-    }
-
-    private static bool IsInsideInflated(Rectangle rectangle, Point point, int inflate)
-    {
-        var inflated = rectangle;
-        inflated.Inflate(inflate, inflate);
-        return inflated.Contains(point);
+        error = string.Empty;
+        return text;
     }
 
     private void EnsureForeground(IntPtr hWnd)

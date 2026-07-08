@@ -520,41 +520,29 @@ public sealed class VisibleChatExportService : IVisibleChatExportService
         var centerY = screenRegion.Y + message.Bbox.Y + (message.Bbox.EffectiveH / 2);
         EnsureWeChatForeground(hWnd);
 
-        var copyClicks = new[]
+        WindowsClipboard.Clear();
+        Thread.Sleep(_options.InteractionDelayMs);
+
+        if (!ContextMenuCopyClicker.RightClickAndClickCopy(
+            new Point(centerX, centerY),
+            _options.InteractionDelayMs))
         {
-            new Point(centerX + _options.ContextMenuCopyClickOffsetX, centerY + _options.ContextMenuCopyClickOffsetY),
-            new Point(centerX + _options.ContextMenuCopyClickOffsetX, centerY - 46),
-            new Point(centerX + _options.ContextMenuCopyClickOffsetX, centerY - 82),
-            new Point(centerX - 70, centerY - 46)
-        };
-
-        foreach (var copyClick in copyClicks.Distinct())
-        {
-            WindowsClipboard.Clear();
-            Thread.Sleep(_options.InteractionDelayMs);
-
-            _ = ContextMenuCopyClicker.RightClickAndClickCopy(
-                new Point(centerX, centerY),
-                [copyClick],
-                _options.InteractionDelayMs);
-            Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
-
-            using var copied = WindowsClipboard.Capture();
-            KeyboardInputDriver.Escape();
-            Thread.Sleep(_options.InteractionDelayMs);
-
-            if (copied.Image is null)
-            {
-                continue;
-            }
-
-            writer.AppendImage(copied.Image);
-            error = string.Empty;
-            return true;
+            error = "context_menu_not_found";
+            return false;
         }
 
-        error = "clipboard_has_no_image_after_copy";
-        return false;
+        Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
+
+        using var copied = WindowsClipboard.Capture();
+        if (copied.Image is null)
+        {
+            error = "clipboard_has_no_image_after_copy";
+            return false;
+        }
+
+        writer.AppendImage(copied.Image);
+        error = string.Empty;
+        return true;
     }
 
     private string? TryCopyTextMessage(
@@ -586,54 +574,27 @@ public sealed class VisibleChatExportService : IVisibleChatExportService
         var center = new Point(textRect.X + (textRect.Width / 2), textRect.Y + (textRect.Height / 2));
         EnsureWeChatForeground(hWnd);
 
-        var copyClicks = new[]
+        WindowsClipboard.Clear();
+        Thread.Sleep(_options.InteractionDelayMs);
+
+        if (!ContextMenuCopyClicker.RightClickAndClickCopy(center, _options.InteractionDelayMs))
         {
-            new Point(center.X + _options.ContextMenuCopyClickOffsetX, center.Y + _options.ContextMenuCopyClickOffsetY),
-            new Point(center.X + _options.ContextMenuCopyClickOffsetX, center.Y - 46),
-            new Point(center.X - 90, center.Y + _options.ContextMenuCopyClickOffsetY),
-            new Point(center.X - 90, center.Y - 46),
-            new Point(center.X, textRect.Bottom + 34)
-        };
-
-        foreach (var copyClick in copyClicks.Distinct())
-        {
-            if (IsInsideInflated(textRect, copyClick, 6))
-            {
-                continue;
-            }
-
-            WindowsClipboard.Clear();
-            Thread.Sleep(_options.InteractionDelayMs);
-
-            _ = ContextMenuCopyClicker.RightClickAndClickCopy(
-                center,
-                [copyClick],
-                _options.InteractionDelayMs,
-                textRect);
-            Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
-
-            using var copied = WindowsClipboard.Capture();
-            var text = NormalizeCopiedText(copied.Text);
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                KeyboardInputDriver.Escape();
-                Thread.Sleep(_options.InteractionDelayMs);
-                continue;
-            }
-
-            error = string.Empty;
-            return text;
+            error = "context_menu_not_found";
+            return null;
         }
 
-        error = "clipboard_has_no_text_after_copy";
-        return null;
-    }
+        Thread.Sleep(_options.VisibleExportImageCopyWaitMs);
 
-    private static bool IsInsideInflated(Rectangle rectangle, Point point, int padding)
-    {
-        var inflated = rectangle;
-        inflated.Inflate(padding, padding);
-        return inflated.Contains(point);
+        using var copied = WindowsClipboard.Capture();
+        var text = NormalizeCopiedText(copied.Text);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            error = "clipboard_has_no_text_after_copy";
+            return null;
+        }
+
+        error = string.Empty;
+        return text;
     }
 
     private static string NormalizeCopiedText(string? text)
@@ -892,8 +853,6 @@ public sealed class VisibleChatExportService : IVisibleChatExportService
             Thread.Sleep(_options.InteractionDelayMs);
 
             var value = WindowsClipboard.GetText().Trim();
-            KeyboardInputDriver.Escape();
-            Thread.Sleep(_options.InteractionDelayMs);
 
             if (!string.IsNullOrWhiteSpace(value))
             {

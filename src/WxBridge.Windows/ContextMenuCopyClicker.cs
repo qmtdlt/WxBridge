@@ -7,9 +7,7 @@ internal static class ContextMenuCopyClicker
 {
     public static bool RightClickAndClickCopy(
         Point anchor,
-        IEnumerable<Point> fallbackCopyClicks,
-        int interactionDelayMs,
-        Rectangle? avoidRect = null)
+        int interactionDelayMs)
     {
         foreach (var probe in ProbeY(anchor))
         {
@@ -23,22 +21,6 @@ internal static class ContextMenuCopyClicker
                 MouseInputDriver.Click(copyPoint.X, copyPoint.Y);
                 return true;
             }
-
-            KeyboardInputDriver.Escape();
-            Thread.Sleep(Math.Max(0, interactionDelayMs / 2));
-        }
-
-        foreach (var copyClick in fallbackCopyClicks.Distinct())
-        {
-            if (avoidRect is not null && IsInsideInflated(avoidRect.Value, copyClick, 6))
-            {
-                continue;
-            }
-
-            MouseInputDriver.RightClick(anchor.X, anchor.Y);
-            Thread.Sleep(Math.Max(0, interactionDelayMs));
-            MouseInputDriver.Click(copyClick.X, copyClick.Y);
-            return true;
         }
 
         return false;
@@ -141,13 +123,6 @@ internal static class ContextMenuCopyClicker
     {
         return Math.Abs((bounds.Left + (bounds.Width / 2)) - point.X)
             + Math.Abs((bounds.Top + (bounds.Height / 2)) - point.Y);
-    }
-
-    private static bool IsInsideInflated(Rectangle rectangle, Point point, int padding)
-    {
-        var inflated = rectangle;
-        inflated.Inflate(padding, padding);
-        return inflated.Contains(point);
     }
 
     private static string GetClassName(IntPtr hWnd)
