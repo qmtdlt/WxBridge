@@ -28,7 +28,7 @@ Read [references/commands.md](references/commands.md) when you need exact comman
 
 - Prefer WxBridge CLI commands over Computer Use for supported WeChat operations.
 - Never send a WeChat message without explicit user confirmation after the target chat and message/clipboard intent are clear.
-- For `sessions open --name`, pass pinyin, not Chinese. Convert names like `file-transfer-assistant` to `filetransferassistant` before calling the CLI.
+- For `sessions open --name`, pass Hanyu Pinyin only, not Chinese and not English translation. Convert `文件传输助手` to `wenjianchuanshuzhushou`; never use `filetransferassistant`.
 - For visual exports, Codex should identify sender, type, and screenshot-relative copy points only. Do not OCR message text as the primary source.
 - Let the CLI right-click-copy text/images and write Markdown. JSON text is only a fallback if copy fails.
 - Skip partially visible messages unless the user explicitly wants them.
@@ -41,7 +41,7 @@ Read [references/commands.md](references/commands.md) when you need exact comman
 Convert the target name to pinyin and run:
 
 ```powershell
-.\wxbridge.ps1 sessions open --name "pinyin-name"
+& "$env:WXBRIDGE_HOME\wxbridge.cmd" sessions open --name "wenjianchuanshuzhushou"
 ```
 
 ### Send Message Or Clipboard Content

@@ -37,14 +37,20 @@ Use `.\wxbridge.ps1 -Rebuild status` only when working inside a cloned developme
 
 ## Open Chat
 
-Use pinyin for search names:
+Use Hanyu Pinyin for search names. Do not translate Chinese names by meaning.
 
 ```powershell
-& $wxbridge sessions open --name "filetransferassistant"
-& $wxbridge sessions open --name "contacta"
+& $wxbridge sessions open --name "wenjianchuanshuzhushou"
+& $wxbridge sessions open --name "lizi"
 ```
 
-The CLI searches WeChat and opens the first result. For Chinese user requests, convert the target name to pinyin before calling the command.
+The CLI searches WeChat and opens the first result. For Chinese user requests, convert the target name to Hanyu Pinyin before calling the command.
+
+Important examples:
+
+- `文件传输助手` -> `wenjianchuanshuzhushou`
+- `张三` -> `zhangsan`
+- Do not use English translations such as `filetransferassistant`.
 
 ## Markdown Configuration
 

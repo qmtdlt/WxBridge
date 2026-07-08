@@ -36,7 +36,7 @@ Switches to the Nth chat item in the visible chat list by activating WeChat and 
 
 With `--name`, WxBridge opens the WeChat search box, pastes the given keyword, waits for search results, and presses Enter to open the first result.
 
-When invoking this command from natural language, convert Chinese names or group keywords to pinyin before constructing the CLI command. For example, "open contact-a chat" should call `wxbridge sessions switch --name "contacta"`. Pinyin search avoids WeChat's Chinese web-search suggestions and is more stable for opening the intended chat.
+When invoking this command from natural language, convert Chinese names or group keywords to Hanyu Pinyin before constructing the CLI command. Do not translate Chinese names by meaning. For example, `文件传输助手` should call `wxbridge sessions switch --name "wenjianchuanshuzhushou"`. Pinyin search avoids WeChat's Chinese web-search suggestions and is more stable for opening the intended chat.
 
 ## sessions open
 
@@ -50,12 +50,12 @@ Searches WeChat by contact or group keyword and opens the first result. This is 
 The final `--name` or `--query` value should be a pinyin search keyword, not the original Chinese text. For example:
 
 ```text
-contact-a -> contacta
-example-org -> exampleorg
-example-group -> examplegroup
+文件传输助手 -> wenjianchuanshuzhushou
+张三 -> zhangsan
+项目群 -> xiangmuqun
 ```
 
-This convention is especially important for LLM callers that translate a user instruction into a CLI command: convert the Chinese keyword to pinyin first, then call `sessions open` or `sessions switch`.
+This convention is especially important for LLM callers that turn a user instruction into a CLI command: convert the Chinese keyword to pinyin first, then call `sessions open` or `sessions switch`. Do not use English translations such as `filetransferassistant`.
 
 The search implementation uses these configurable offsets relative to the WeChat main window:
 
