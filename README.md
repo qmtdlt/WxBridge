@@ -69,7 +69,7 @@ Current scope:
 - Inspect the WeChat UI Automation tree to determine whether chat names are readable.
 - Switch chat session by index: implemented with Win32 window activation and OS-level mouse input.
 - Send text, files, or the current clipboard to the focused WeChat chat.
-- Export a visible-chat prototype by scanning left/right avatar bands.
+- Export a legacy visible-chat prototype by scanning left/right avatar bands. This is not the recommended Codex/Skill export path.
 - Snapshot the current visible chat area so Codex can read the screenshot, then apply Codex's structured analysis to write Markdown and copy image messages from WeChat.
 - Export merged-forwarded chat-record popups through Codex-assisted screenshots, popup clicking, popup scrolling, and duplicate-aware Markdown writing.
 
@@ -94,8 +94,6 @@ dotnet run --project .\src\WxBridge.Cli -- messages send-clipboard
 dotnet run --project .\src\WxBridge.Cli -- messages send-text-to --index 1 --text "hello"
 dotnet run --project .\src\WxBridge.Cli -- messages send-file-to --index 1 --path "<path-to-video>"
 dotnet run --project .\src\WxBridge.Cli -- messages send-clipboard-to --index 1
-dotnet run --project .\src\WxBridge.Cli -- messages export-visible --output "<captures-dir>\chat.md"
-dotnet run --project .\src\WxBridge.Cli -- messages export-visible --name "manual-capture"
 dotnet run --project .\src\WxBridge.Cli -- messages snapshot-visible --name "visible-capture"
 dotnet run --project .\src\WxBridge.Cli -- messages apply-visible-analysis --input "<captures-dir>\visible-capture_assets\visible-chat-analysis.json"
 dotnet run --project .\src\WxBridge.Cli -- merged snapshot-entry --name "merged-capture"
@@ -106,7 +104,6 @@ dotnet run --project .\src\WxBridge.Cli -- merged apply-popup-analysis --input "
 dotnet run --project .\src\WxBridge.Cli -- merged apply-scroll-snapshot --input "<captures-dir>\merged-capture_assets\merged-popup-analysis-001.json" --name "merged-capture" --index 002
 dotnet run --project .\src\WxBridge.Cli -- merged apply-popup-analysis --input "<captures-dir>\merged-capture_assets\merged-popup-analysis-001.json" --skip-images
 dotnet run --project .\src\WxBridge.Cli -- merged scroll-popup --hwnd "0x123456"
-dotnet run --project .\src\WxBridge.Cli -- messages export-visible --output "<captures-dir>\chat.md" --resolve-names --copy-content
 dotnet run --project .\src\WxBridge.Cli -- capture start --output "<captures-dir>\chat.md"
 dotnet run --project .\src\WxBridge.Cli -- capture start --name "manual-capture"
 dotnet run --project .\src\WxBridge.Cli -- capture start --background

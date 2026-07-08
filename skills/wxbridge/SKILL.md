@@ -30,6 +30,7 @@ Read [references/commands.md](references/commands.md) when you need exact comman
 - Never send a WeChat message without explicit user confirmation after the target chat and message/clipboard intent are clear.
 - For `sessions open --name`, pass Hanyu Pinyin only, not Chinese and not English translation. Convert `文件传输助手` to `wenjianchuanshuzhushou`; never use `filetransferassistant`.
 - For visual exports, Codex should identify sender, type, and screenshot-relative copy points only. Do not OCR message text as the primary source.
+- For visible chat export, never use `messages export-visible`; it is an old prototype that scans avatars and produces low-quality Markdown. Always use `messages snapshot-visible`, inspect the returned screenshot, write `copyPoints`, then run `messages apply-visible-analysis`.
 - Let the CLI right-click-copy text/images and write Markdown. JSON text is only a fallback if copy fails.
 - Skip partially visible messages unless the user explicitly wants them.
 - Return the final Markdown full path in a copyable PowerShell code block.
@@ -59,7 +60,9 @@ Use the config commands in [references/commands.md](references/commands.md) to s
 
 ### Export Current Visible Chat
 
-Use `messages snapshot-visible`, inspect the screenshot, write lightweight `copyPoints`, then run `messages apply-visible-analysis`.
+Use only `messages snapshot-visible`, inspect the screenshot, write lightweight `copyPoints`, then run `messages apply-visible-analysis`.
+
+Do not use `messages export-visible` for user-facing exports.
 
 Each copy point must bind content to the correct speaker:
 

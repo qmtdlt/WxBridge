@@ -115,6 +115,8 @@ These commands switch to the indexed chat first, then send the payload.
 
 ## messages export-visible
 
+Legacy prototype. Do not use this command for Codex/Skill user-facing exports. Prefer `messages snapshot-visible` plus `messages apply-visible-analysis`.
+
 ```powershell
 wxbridge messages export-visible --output "<captures-dir>\chat.md"
 wxbridge messages export-visible --name "manual-capture"

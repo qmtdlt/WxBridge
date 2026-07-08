@@ -74,6 +74,12 @@ Set the user's own speaker name:
 
 ## Visible Chat Export
 
+Do not use `messages export-visible` for user-facing exports. It is an older prototype that scans avatar bands and can generate incomplete Markdown. The supported workflow is:
+
+```text
+snapshot-visible -> Codex writes copyPoints -> apply-visible-analysis
+```
+
 1. Snapshot current visible chat:
 
 ```powershell
